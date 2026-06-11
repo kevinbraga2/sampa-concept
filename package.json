@@ -6,7 +6,7 @@
     "db:up": "docker-compose up -d postgres evolution_api",
     "predev": "npm run db:up && npx prisma generate",
     "dev": "next dev",
-    "build": "npx prisma generate && npx prisma migrate deploy && next build",
+    "build": "npx prisma generate && next build",
     "start": "next start"
   },
   "dependencies": {
