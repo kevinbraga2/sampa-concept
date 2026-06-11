@@ -20,7 +20,7 @@ import {
     Menu,
     X,
     List,
-    BottleWine
+    Store
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -54,7 +54,7 @@ export default function Sidebar({ role }: SidebarProps) {
             { name: "Clientes", href: "/dashboard/admin/clients", icon: Users },
             { name: "Financeiro", href: "/dashboard/admin/financial", icon: DollarSign },
             { name: "Serviços", href: "/dashboard/admin/services", icon: List },
-            { name: "Produtos", href: "/dashboard/admin/products", icon: BottleWine},
+            { name: "Produtos", href: "/dashboard/admin/products", icon: Store},
             { name: "Comissões", href: "/dashboard/admin/commissions", icon: CreditCard },
             { name: "Relatórios Personalizados", href: "/dashboard/admin/reports", icon: PieChart },
             { name: "Analytics", href: "/dashboard/admin/analytics", icon: TrendingUp },

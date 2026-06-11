@@ -23,19 +23,25 @@ import { StepNavigation } from "@/components/ui/StepNavigation";
 // Types
 import { Prisma, Service, Professional } from "@/prisma/generated/client"; 
 
+type ProfessionalWithServices = Prisma.ProfessionalGetPayload<{
+  include: { services: true };
+}>;
+
+type AppointmentService = {
+  serviceId: string;
+  professionalId: string;
+};
+
 type Appointment = {
-    totalDuration: string;
-    totalPrice: string;
-    fullName: string;
-    whatsApp: string;
-    date: string;
-    time: string;
-    observations: string;
-    services: {
-        serviceId: string;
-        professionalId: string;
-    }[]
-}
+  totalDuration: string;
+  totalPrice: string;
+  fullName: string;
+  whatsApp: string;
+  date: string;
+  time: string;
+  observations: string;
+  services: AppointmentService[];
+};
 
 export default function SchedulingPage() {
 
@@ -55,7 +61,8 @@ export default function SchedulingPage() {
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
   
-    const [professionals, setProfessionals] = useState<Professional[]>([]);
+    const [professionals, setProfessionals] = useState<ProfessionalWithServices[]>([]);
+
     const [services, setServices] = useState<Service[]>([]);
 
     const now = new Date();
@@ -157,7 +164,7 @@ export default function SchedulingPage() {
             if (!response.success || !response.data?.id) {
                 throw new Error(response.error || "Erro ao criar agendamento.");
             }
-
+            
             router.push(`/agendamento/confirmado?id=${response.data.id}`);
         } catch (error: any) {
             console.error("Erro ao criar agendamento:", error);

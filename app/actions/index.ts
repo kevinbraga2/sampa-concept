@@ -38,60 +38,7 @@ interface Input {
   duration: number;
 }
 
-export async function getSchedules(dateStr?: string) {
-  try {
-    const targetDate = dateStr ? new Date(dateStr) : new Date();
 
-    const dayStart = new Date(targetDate);
-    dayStart.setHours(0, 0, 0, 0);
-
-    const dayEnd = new Date(targetDate);
-    dayEnd.setHours(23, 59, 59, 999);
-
-    const professionals = await db.professional.findMany({
-      where: { active: true },
-      select: {
-        id: true,
-        name: true,
-        active: true,
-        profileImage: true,
-        category: true,
-        bookings: {
-          where: {
-            startTime: { gte: dayStart, lte: dayEnd },
-          },
-          select: {
-            id: true,
-            startTime: true,
-            endTime: true,
-            booking: {
-              select: {
-                id: true,
-                status: true,
-                client: {
-                  select: { name: true, phone: true },
-                },
-                payments: {
-                  select: { amount: true },
-                },
-              },
-            },
-            service: {
-              select: { name: true, price: true, duration: true },
-            },
-          },
-        },
-      },
-    });
-
-    // Reshape into the structure AppointmentGrid expects
-    return professionals;
-    
-  } catch (error) {
-    console.error("Failed to fetch schedule:", error);
-    throw new Error("Failed to load schedule.");
-  }
-}
 
 export async function getAvailableSlots(professionalId: string, selectedDate: Date) {
   try {
@@ -183,38 +130,6 @@ export async function getAvailableSlots(professionalId: string, selectedDate: Da
   }
 }
 
-export async function getAppointments() {
-  try {
-    const bookings = await db.appointment.findMany({
-      include: {
-        client: true,
-        services: {
-          include: {
-            service: true,
-            professional: true,
-          },
-        },
-        payments: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return {
-      success: true,
-      data: bookings,
-    };
-  } catch (error) {
-    console.error("Failed to fetch bookings", error);
-
-    return {
-      success: false,
-      error: "Failed to fetch bookings",
-    };
-  }
-}
-
 export async function getAppointmentById(appointmentId: string) {
   try {
     if (!appointmentId) {
@@ -256,49 +171,6 @@ export async function getAppointmentById(appointmentId: string) {
     return {
       success: false,
       error: "Falha ao carregar os dados do agendamento.",
-    };
-  }
-}
-
-export async function getAppointmentsByDate(date: Date) {
-  try {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const bookings = await db.scheduledService.findMany({
-      where: {
-        startTime: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-      },
-      include: {
-        booking: {
-          include: {
-            client: true,
-          },
-        },
-        service: true,
-        professional: true,
-      },
-      orderBy: {
-        startTime: "asc",
-      },
-    });
-
-    return {
-      success: true,
-      data: bookings,
-    };
-  } catch (error) {
-    console.error("Failed to fetch bookings", error);
-
-    return {
-      success: false,
-      error: "Failed to fetch bookings",
     };
   }
 }

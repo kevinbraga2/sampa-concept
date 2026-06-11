@@ -1,17 +1,15 @@
 import { User } from "lucide-react";
-import { Service, Professional, ProfessionalService } from "@/prisma/generated/client/edge";
+import { Service, Professional, ProfessionalService, Prisma } from "@/prisma/generated/client/edge";
 import { Dispatch, SetStateAction } from "react";
 
-type ProfessionalWithServices = Professional & {
-  services: ProfessionalService[];
-};
+type ProfessionalWithServices = Prisma.ProfessionalGetPayload<{
+  include: { services: true };
+}>;
 
-interface ChooseProfessionalProps {
-  appointment: Appointment;
-  professionals: Professional[];
-  services: Service[];
-  setAppointment: Dispatch<SetStateAction<Appointment>>;
-}
+type AppointmentService = {
+  serviceId: string;
+  professionalId: string;
+};
 
 type Appointment = {
   totalDuration: string;
@@ -21,11 +19,15 @@ type Appointment = {
   date: string;
   time: string;
   observations: string;
-  services: {
-    serviceId: string;
-    professionalId: string;
-  }[];
+  services: AppointmentService[];
 };
+
+interface ChooseProfessionalProps {
+  appointment: Appointment;
+  professionals: ProfessionalWithServices[];
+  services: Service[];
+  setAppointment: Dispatch<SetStateAction<Appointment>>;
+}
 
 export function ChooseProfessional({
   appointment,

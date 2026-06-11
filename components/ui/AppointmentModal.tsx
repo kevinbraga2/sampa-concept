@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Professional, Service } from '@/prisma/generated/client';
 import { formatDuration, formatBrazilianPhone} from '@/lib/utils';
-import { getClientByPhone, createBooking, getProfessionals, getServicesByProfessional } from '@/app/actions/';
+import { getClientByPhone, createAppointment, getProfessionals, getServicesByProfessional } from '@/app/actions/';
 
 interface FormData {
   clientName: string;
@@ -95,17 +95,20 @@ export function AppointmentModal({ onClose }: AppointmentModalProps) {
       }
 
       // 3. Dispara a Server Action (Corrigido para clientName e clientPhone)
-      const response = await createBooking({
-        name: formData.clientName,
-        phone: formData.clientPhone,
-        professionalId: formData.professionalId,
-        serviceId: formData.serviceId,
+      const response = await createAppointment({
+        fullName: formData.clientName,
+        whatsApp: formData.clientPhone,
         date: formData.date,
         time: formData.time,
         observations: formData.observations,
-        priceInCents: selectedService.price,
-        durationInMinutes: selectedService.duration // O servidor calcula o endTime com isso
+        services: [
+          {
+            serviceId: formData.serviceId,
+            professionalId: formData.professionalId,
+          }
+        ]
       });
+
 
       console.log(response);
 
@@ -248,7 +251,7 @@ export function AppointmentModal({ onClose }: AppointmentModalProps) {
                 {isLoading ? "Carregando profissionais..." : "Selecionar profissional"}
               </option>
               {professionals.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+                <option key={p.id} value={p.id}>{p.fullName}</option>
               ))}
             </select>
           </div>

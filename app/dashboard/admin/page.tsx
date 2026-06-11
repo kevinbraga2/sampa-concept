@@ -21,7 +21,8 @@ async function getDashboardData() {
     completedPayments,
     monthPayments,
     recentBookings,
-    professionals,
+    professionalsRaw,
+    completedToday,
   ] = await Promise.all([
     db.client.count(),
 
@@ -58,27 +59,31 @@ async function getDashboardData() {
     }),
 
     db.professional.findMany({
-      where: { active: true },
-      include: {
-        appointments: {
-          where: { startTime: { gte: startOfToday } },
-        },
-        _count: { select: { appointments: true } },
+  where: { active: true },
+  include: {
+    appointments: {
+      where: { startTime: { gte: startOfToday } },
+      select: { id: true },
+    },
+  },
+  orderBy: { createdAt: "asc" },
+}),
+
+    db.appointment.count({
+      where: {
+        status: "COMPLETED",
+        createdAt: { gte: startOfToday },
       },
-      orderBy: { createdAt: "asc" },
     }),
   ]);
 
+const professionals = professionalsRaw.map(({ appointments, ...pro }) => ({
+  ...pro,
+  scheduledServicesCount: appointments.length,
+}));
+
   const totalRevenueToday = (completedPayments._sum.amount ?? 0) / 100;
   const totalRevenueMonth = (monthPayments._sum.amount ?? 0) / 100;
-
-  const completedToday = await db.appointment.count({
-    where: {
-      status: "COMPLETED",
-      createdAt: { gte: startOfToday },
-    },
-  });
-
   const conversionRate =
     todayBookings > 0 ? Math.round((completedToday / todayBookings) * 100) : 0;
 
@@ -94,7 +99,6 @@ async function getDashboardData() {
     professionals,
   };
 }
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatCurrency(cents: number) {
@@ -276,7 +280,7 @@ export default async function EnterpriseDashboard() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-gray-900">
-                        {pro.appointments.length} hoje
+                        {pro.scheduledServicesCount} hoje
                       </p>
                       {pro.rating && (
                         <p className="text-xs text-yellow-600">★ {pro.rating.toFixed(1)}</p>
