@@ -38,10 +38,4 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-        script: |
-              powershell -Command "
-                cd 'C:\sampa-concept';
-                npm install --omit=dev;
-                npx prisma generate;
-                pm2 restart sampa-concept --update-env; if ($LASTEXITCODE -ne 0) { pm2 start npm --name 'sampa-concept' -- start; pm2 save }
-              "
+          script: powershell -Command "cd 'C:\sampa-concept'; npm install --omit=dev; npx prisma generate; pm2 restart sampa-concept --update-env; if ($LASTEXITCODE -ne 0) { pm2 start npm --name 'sampa-concept' -- start; pm2 save }"
