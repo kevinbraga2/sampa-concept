@@ -17,6 +17,8 @@ jobs:
           cache: 'npm'
 
       - name: Instalar dependências e gerar o Build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           npm ci
           npm run build
