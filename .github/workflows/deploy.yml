@@ -1,43 +1,18 @@
-name: Build and Deploy to Windows VPS
+name: Deploy to Windows VPS
 on:
   push:
     branches:
       - main
+
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Instalar Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Instalar dependências e gerar o Build
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          npm ci
-          npm run build
-
-      - name: Enviar arquivos compilados para a VPS Windows
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          source: ".next/,public/,package.json,package-lock.json,next.config.js,next.config.mjs,prisma/"
-          target: "C:\\sampa-concept"
-
-      - name: Reiniciar o App no PM2 da VPS
+      - name: Deploy na VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          script: powershell -Command "cd 'C:\sampa-concept'; npm install --omit=dev; npx prisma migrate deploy; pm2 restart sampa-concept --update-env; if ($LASTEXITCODE -ne 0) { pm2 start npm --name 'sampa-concept' -- start; pm2 save }"
+          script: powershell -Command "cd 'C:\sampa-concept'; git pull; npm install --omit=dev; npm run build; pm2 restart sampa-concept --update-env; if ($LASTEXITCODE -ne 0) { pm2 start npm --name 'sampa-concept' -- start; pm2 save }"
