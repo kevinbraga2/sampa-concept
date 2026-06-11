@@ -17,7 +17,7 @@ export default function EnterpriseClientsPage() {
                     <div className="flex gap-3">
                         <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                             <UserPlus className="h-4 w-4 inline mr-2" />
-                            Novo Cliente
+                            Novo Clientes
                         </button>
                         <button className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                             Exportar Lista
