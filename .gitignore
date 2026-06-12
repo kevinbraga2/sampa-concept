@@ -136,4 +136,4 @@ dist
 .pnp.*
 
 # prisma
-generated/prisma/client/
+prisma/generated
